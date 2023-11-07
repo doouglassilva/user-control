@@ -4,32 +4,28 @@ using Usuario.DTO.DTO;
 
 namespace UsuariosRegistration.API.Usuarios.Application
 {
-    [Route("usuarios")]
+    [Route("api/usuarios")]
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly IUsuarioService usuarioService;
+        private readonly IUsuarioService _usuarioService;
 
         public UsuariosController(IUsuarioService usuarioService)
         {
-            this.usuarioService = usuarioService;
+            _usuarioService = usuarioService;
         }
 
         [HttpPost]
-        public ActionResult<UsuarioDTO> Criar([FromBody] UsuarioDTO usuario)
+        public ActionResult<UsuarioDTO> CriarUsuario([FromBody] UsuarioDTO usuario)
         {
             try
             {
-                var resultado = usuarioService.Criar(usuario);
-
-                if (resultado == null)
-                    return NotFound();
-
+                var resultado = _usuarioService.Criar(usuario);
                 return Ok(resultado);
             }
             catch (ArgumentException ex)
             {
-                return StatusCode(409, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -38,20 +34,12 @@ namespace UsuariosRegistration.API.Usuarios.Application
         }
 
         [HttpGet]
-        public ActionResult<List<UsuarioDTO>> ObterTodos()
+        public ActionResult<List<UsuarioDTO>> ObterTodosUsuarios()
         {
             try
             {
-                var resultado = usuarioService.ObterTodos();
-
-                if (resultado == null || resultado.Count == 0)
-                    return NotFound();
-
+                var resultado = _usuarioService.ObterTodos();
                 return Ok(resultado);
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode(409, ex.Message);
             }
             catch (Exception ex)
             {
@@ -59,21 +47,15 @@ namespace UsuariosRegistration.API.Usuarios.Application
             }
         }
 
-        [HttpGet("{UsuarioId}")]
-        public ActionResult<UsuarioDTO> Obter(int UsuarioId)
+        [HttpGet("{id}")]
+        public ActionResult<UsuarioDTO> ObterUsuario(int id)
         {
             try
             {
-                var resultado = usuarioService.Obter(UsuarioId);
-
+                var resultado = _usuarioService.Obter(id);
                 if (resultado == null)
                     return NotFound();
-
                 return Ok(resultado);
-            }
-            catch (ArgumentException ex)
-            {
-                return StatusCode(409, ex.Message);
             }
             catch (Exception ex)
             {
@@ -81,21 +63,17 @@ namespace UsuariosRegistration.API.Usuarios.Application
             }
         }
 
-        [HttpDelete("{UsuarioId}")]
-        public ActionResult<bool> Deletar(int UsuarioId)
+        [HttpDelete("{id}")]
+        public ActionResult<bool> DeletarUsuario(int id)
         {
             try
             {
-                var resultado = usuarioService.Deletar(UsuarioId);
-
-                if (!resultado)
-                    return NotFound();
-
+                var resultado = _usuarioService.Deletar(id);
                 return Ok(resultado);
             }
             catch (ArgumentException ex)
             {
-                return StatusCode(409, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -104,20 +82,16 @@ namespace UsuariosRegistration.API.Usuarios.Application
         }
 
         [HttpPut]
-        public ActionResult<bool> Atualizar([FromBody] UsuarioDTO usuario)
+        public ActionResult<bool> AtualizarUsuario([FromBody] UsuarioDTO usuario)
         {
             try
             {
-                var resultado = usuarioService.Atualizar(usuario);
-
-                if (!resultado)
-                    return NotFound();
-
+                var resultado = _usuarioService.Atualizar(usuario);
                 return Ok(resultado);
             }
             catch (ArgumentException ex)
             {
-                return StatusCode(409, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

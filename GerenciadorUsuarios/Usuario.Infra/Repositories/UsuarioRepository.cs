@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
 using Usuario.Domain.Entities;
 using Usuario.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Usuario.Infrastructure.Context;
 
 namespace Usuario.Infrastructure.Repositories
@@ -36,7 +33,17 @@ namespace Usuario.Infrastructure.Repositories
 
         public bool Atualizar(Usuarios usuario)
         {
-            _context.Entry(usuario).State = EntityState.Modified;
+            var existingUser = _context.Usuarios.Local.FirstOrDefault(u => u.Id == usuario.Id);
+
+            if (existingUser != null)
+            {
+                AtualizarEntidadeExistente(existingUser, usuario);
+            }
+            else
+            {
+                _context.Entry(usuario).State = EntityState.Modified;
+            }
+
             _context.SaveChanges();
             return true;
         }
@@ -56,6 +63,11 @@ namespace Usuario.Infrastructure.Repositories
         public bool JaExisteUsuarioComEmail(string email)
         {
             return _context.Usuarios.Any(u => u.Email == email);
+        }
+
+        private void AtualizarEntidadeExistente(Usuarios existingUser, Usuarios newUser)
+        {
+            _context.Entry(existingUser).CurrentValues.SetValues(newUser);
         }
     }
 }
