@@ -54,6 +54,11 @@ namespace Usuario.Application.Services
         public bool Atualizar(UsuarioDTO usuarioDTO)
         {
             DeveSerUsuario(usuarioDTO.Id);
+            DeveConterEmail(usuarioDTO.Email);
+            DeveConterDataNascimento(usuarioDTO.DataNascimento);
+            DataDeveSerMaiorQueHoje(usuarioDTO.DataNascimento);
+            EscolaridadeInválida(usuarioDTO.Escolaridade.GetDescription());
+
             return _usuarioRepository.Atualizar(UsuarioMapper.UsuarioDTOParaUsuario(usuarioDTO));
         }
 

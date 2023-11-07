@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { UsuarioService } from './services/usuario.service';
 import { Usuario } from './models/usuario';
-import { Escolaridade } from './models/escolaridade';
-import { NgForm } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-root',
@@ -10,55 +10,113 @@ import { NgForm } from '@angular/forms';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  usuarioForm!: FormGroup;
+
   usuario: Usuario = {} as Usuario;
   usuarios: Usuario[] = [];
-  escolaridades: Escolaridade[] = [];
+  escolaridades: { codigo: number; descricao: string }[] = [
+    { codigo: 1, descricao: 'Infantil' },
+    { codigo: 2, descricao: 'Fundamental' },
+    { codigo: 3, descricao: 'Médio' },
+    { codigo: 4, descricao: 'Superior' },
+  ];
 
   constructor(
     private usuarioService: UsuarioService,
+    private toastr: ToastrService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit() {
+    this.usuarioForm = this.fb.group({
+      nome: [this.usuario.nome, Validators.required],
+      sobrenome: [this.usuario.sobrenome, Validators.required],
+      email: [this.usuario.email, [Validators.required, Validators.email]],
+      dataNascimento: [this.usuario.dataNascimento, Validators.required],
+      escolaridade: [this.usuario.escolaridade =1 ]
+    });
+
     this.obterTodosUsuarios();
   }
 
-  // Define se um usuário será criado ou atualizado
-  salvarUsuario(form: NgForm) {
+  salvarUsuario() {
     if (this.usuario.id) {
-      this.usuarioService.atualizarUsuario(this.usuario).subscribe(() => {
-        this.cleanForm(form);
-      });
+      this.atualizarUsuario();
     } else {
-      this.usuarioService.criarUsuario(this.usuario).subscribe(() => {
-        this.cleanForm(form);
-      });
+      this.criarNovoUsuario();
     }
   }
 
-  // Chama o serviço para obter todos os usuários
+  private atualizarUsuario() {
+    this.usuarioService.atualizarUsuario(this.usuario).subscribe(
+      () => {
+        this.exibirToast('Usuário atualizado com sucesso!', 'success');
+        this.limparForm();
+      },
+      (error) => {
+        this.exibirToast(`${error}`, 'error');
+      }
+    );
+  }
+
+  private criarNovoUsuario() {
+    this.usuarioService.criarUsuario(this.usuario).subscribe(
+      () => {
+        this.exibirToast('Usuário cadastrado com sucesso!', 'success');
+
+        setTimeout(() => {
+          this.limparForm();
+        }, 1000);
+
+      },
+      (error) => {
+        this.exibirToast(`${error}`, 'error');
+      }
+    );
+  }
+
   obterTodosUsuarios() {
-    this.usuarioService.obterTodosUsuarios().subscribe((usuarios: Usuario[]) => {
-      console.log(usuarios);
-      this.usuarios = usuarios;
+    this.usuarioService.obterTodosUsuarios().subscribe((obj) => {
+      this.usuarios = obj;
     });
   }
 
-  // Deleta um usuário
   deletarUsuario(usuario: Usuario) {
     this.usuarioService.excluirUsuario(usuario).subscribe(() => {
       this.obterTodosUsuarios();
+      this.exibirToast('Usuário excluído com sucesso!', 'success');
     });
   }
 
-  // Copia o usuário para ser editado
   editarUsuario(usuario: Usuario) {
-    this.usuario = { ...usuario };
+    this.usuarioService.obterUsuario(usuario.id).subscribe((obj: Usuario) => {
+      this.usuario = obj;
+    });
   }
 
-  // Limpa o formulário
-  cleanForm(form: NgForm) {
-    this.obterTodosUsuarios();
-    form.resetForm();
+  limparForm() {
+    this.usuarioForm.reset();
     this.usuario = {} as Usuario;
+    this.obterTodosUsuarios();
+  }
+
+
+  obtemDescricaoEscolaridade(codigoEscolaridade: number): string {
+    const escolaridade = this.escolaridades.find(
+      (esc) => esc.codigo === codigoEscolaridade
+    );
+    return escolaridade ? escolaridade.descricao : 'Escolaridade Desconhecida';
+  }
+
+  exibirToast(mensagem: string, tipo: 'success' | 'error') {
+    this.toastr.show(mensagem, '', {
+      closeButton: true,
+      timeOut: 3000,
+      progressBar: true,
+      positionClass: 'toast-top-right',
+      enableHtml: true,
+      tapToDismiss: true,
+      toastClass: `ngx-toastr toast-${tipo}`,
+    });
   }
 }

@@ -10,14 +10,16 @@ import { environment } from 'src/environments/environment';
 })
 export class UsuarioService {
   private url = environment.apiUrl + '/api/usuarios';
-  private httpOptions = {
-    headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-  };
 
   constructor(private httpClient: HttpClient) {}
 
+  private httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    })
+  };
+
   obterTodosUsuarios(): Observable<Usuario[]> {
-    console.log(this.url);
     return this.httpClient.get<Usuario[]>(this.url).pipe(
       retry(2),
       catchError(this.handleError)
@@ -55,7 +57,7 @@ export class UsuarioService {
     if (error.error instanceof ErrorEvent) {
       return throwError(`Erro no cliente: ${error.error.message}`);
     } else {
-      return throwError(`Código do erro: ${error.status}, mensagem: ${error.message}`);
+      return throwError(`Erro no servidor: ${error.status} - ${error.error}`);
     }
   }
 }

@@ -1,90 +1,91 @@
-<div class="container text-center">
-  <div class="col">
-    <h1 class="breadcrumb-item active" aria-current="page">Gerenciamento de Usuários</h1>
-  </div>
-</div>
-<div class="container">
-  <div class="card list-car">
-    <h5 class="card-header">Lista de Usuários</h5>
+<div class="user-management">
+  <h1 class="page-title text-center">Gerenciamento de Usuários</h1>
+
+  <div class="user-list-card card">
+    <div class="card-header">Lista de Usuários</div>
     <div class="card-body">
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Id</th>
-            <th scope="col">Nome</th>
-            <th scope="col">Sobrenome</th>
-            <th scope="col">Email</th>
-            <th scope="col">Nascimento</th>
-            <th scope="col">Escolaridade</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let usuario of usuarios">
-            <td>{{usuario.id}}</td>
-            <td>{{usuario.nome}}</td>
-            <td>{{usuario.sobrenome}}</td>
-            <td>{{usuario.email}}</td>
-            <td>{{usuario.dataNascimento | date}}</td>
-            <td>{{usuario.escolaridade}}</td>
-            <td>
-              <button type="button" class="btn btn-warning btn-sm" (click)="editarUsuario(usuario)">Editar</button>
-              <button type="button" class="btn btn-danger btn-sm ml-1" (click)="deletarUsuario(usuario)">Deletar</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Nome</th>
+              <th scope="col">Sobrenome</th>
+              <th scope="col" class="text-center">Email</th>
+              <th scope="col">Nascimento</th>
+              <th scope="col">Escolaridade</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody class="table-group-divider">
+            <tr *ngFor="let usuario of usuarios">
+              <td>{{ usuario.nome }}</td>
+              <td class="text-center">{{ usuario.sobrenome }}</td>
+              <td>{{ usuario.email }}</td>
+              <td class="text-center">{{ usuario.dataNascimento | date:'dd/MM/yyyy' }}</td>
+              <td class="text-center">{{ obtemDescricaoEscolaridade(usuario.escolaridade) }}</td>
+              <td class="col-md-2">
+                <button type="button" class="btn btn-warning btn-sm" (click)="editarUsuario(usuario)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="deletarUsuario(usuario)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <div class="card add-car">
-    <h5 class="card-header">Adicionar/Atualizar Usuário</h5>
+  <div class="user-add-card card">
+    <div class="card-header">Adicionar/Atualizar Usuário</div>
     <div class="card-body">
-      <form id="add-form" (ngSubmit)="f.form.valid && salvarUsuario(f)" #f="ngForm" novalidate>
+      <form id="add-form" (ngSubmit)="f.form.valid && salvarUsuario()" #f="ngForm" novalidate>
         <div class="form-group">
-          <label for="model">Nome</label>
-          <input type="text" [(ngModel)]="usuario.nome" id="nome" name="nome" #model="ngModel"
-            class="form-control" placeholder="Digite o nome">
+          <label for="nome">Nome</label>
+          <input type="text" [(ngModel)]="usuario.nome" id="nome" name="nome" #nomeModel="ngModel" required class="form-control"
+            placeholder="Digite o nome">
         </div>
 
         <div class="form-group">
-          <label for="model">Sobrenome</label>
-          <input type="text" [(ngModel)]="usuario.sobrenome" id="sobrenome" name="sobrenome" #model="ngModel"
-            class="form-control"
-            placeholder="Digite o sobrenome">
+          <label for="sobrenome">Sobrenome</label>
+          <input type="text" [(ngModel)]="usuario.sobrenome" id="sobrenome" name="sobrenome" #sobrenomeModel="ngModel" required
+            class="form-control" placeholder="Digite o sobrenome">
         </div>
 
         <div class="form-group">
-          <label for="model">Email</label>
-          <input type="text" [(ngModel)]="usuario.email" id="email" name="email" #model="ngModel" required
-            class="form-control" [ngClass]="{ 'is-invalid': f.submitted && model.invalid }"
-            placeholder="Digite o email">
-          <div *ngIf="f.submitted && model.invalid" class="invalid-feedback">
-            <div *ngIf="model.errors!">Email é obrigatório</div>
+          <label for="email">Email</label>
+          <input type="email" [(ngModel)]="usuario.email" id="email" name="email" #emailModel="ngModel" required class="form-control"
+            [ngClass]="{ 'is-invalid': f.submitted && emailModel.invalid }" placeholder="Exemplo@email.com">
+          <div *ngIf="f.submitted && emailModel.invalid" class="invalid-feedback">
+            <div *ngIf="emailModel.errors?.['required']">Email é obrigatório</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="model">Data Nascimento</label>
-          <input type="text" [(ngModel)]="usuario.dataNascimento" id="dataNascimento" name="dataNascimento" #model="ngModel" required
-            class="form-control" [ngClass]="{ 'is-invalid': f.submitted && model.invalid }"
-            placeholder="Informe a Data de Nascimento">
-          <div *ngIf="f.submitted && model.invalid" class="invalid-feedback">
-            <div *ngIf="model.errors!">Data Nascimento é obrigatório</div>
+          <label for="dataNascimento">Data Nascimento</label>
+          <input type="date" [(ngModel)]="usuario.dataNascimento" id="dataNascimento" name="dataNascimento" #dataNascimentoModel="ngModel"
+            required class="form-control" [ngClass]="{ 'is-invalid': f.submitted && dataNascimentoModel.invalid }"
+            placeholder="Selecione a Data de Nascimento">
+          <div *ngIf="f.submitted && dataNascimentoModel.invalid" class="invalid-feedback">
+            <div *ngIf="dataNascimentoModel.errors?.['required']">Data de Nascimento é obrigatória</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="model">Escolaridade</label>
-          <input type="text" [(ngModel)]="usuario.escolaridade" id="escolaridade" name="escolaridade" #model="ngModel" required
-            class="form-control" [ngClass]="{ 'is-invalid': f.submitted && model.invalid }"
-            placeholder="Informe sua Escolaridade">
-          <div *ngIf="f.submitted && model.invalid" class="invalid-feedback">
-            <div *ngIf="model.errors!">Data Nascimento é obrigatório</div>
+          <label for="escolaridade">Escolaridade</label>
+          <select [(ngModel)]="usuario.escolaridade" id="escolaridade" name="escolaridade" #escolaridadeModel="ngModel" required
+            class="form-control" [ngClass]="{ 'is-invalid': f.submitted && escolaridadeModel.invalid }">
+            <option *ngFor="let escolaridade of escolaridades" [ngValue]="escolaridade.codigo">{{escolaridade.descricao}}</option>
+          </select>
+          <div *ngIf="f.submitted && escolaridadeModel.invalid" class="invalid-feedback">
+            <div *ngIf="escolaridadeModel.errors?.['required']">Escolaridade é obrigatória</div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-add-car">Salvar</button>
-        <button type="reset" class="btn btn-secondary btn-add-car" (click)="cleanForm(f)">Cancelar</button>
+        <button type="submit" class="btn btn-success btn-add-card">Salvar</button>
+        <button type="reset" class="btn btn-danger btn-add-card" (click)="limparForm()">Cancelar</button>
       </form>
     </div>
   </div>
